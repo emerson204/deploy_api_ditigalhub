@@ -4,7 +4,6 @@ from rest_framework import generics , status, serializers
 from rest_framework.response import Response
 from django.http import Http404
 
-from almacen.models import ProductosModel
 from almacen.serializer import  ProductosSerializer
 from almacen.models import ProductosModel
 from .serializer import OrderSerializer, OrdenesSerializerResponse, OrdenDetalleSerializerResponse, ProcessPaymentSerializer

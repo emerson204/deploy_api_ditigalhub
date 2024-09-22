@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Document</title>
+</head>
+
+<body>
+
+   <!-- Botón para abrir el checkout -->
+   <button id="btn_pagar">Pagar</button>
+   <button id="btn">Pagar con culqi</button>
+
+   <div id="culqi-container"></div>
+   <style>
+      #culqi-container {
+         width: 500px;
+         height: 700px;
+         border: 1px solid #ccc;
+         padding: 20px;
+         box-sizing: border-box;
+         /* Asegura que el padding esté dentro del tamaño definido */
+         overflow: auto;
+         margin: auto;
+         /* Permite hacer scroll si el contenido es más grande que el contenedor */
+      }
+   </style>
+   <script src="https://js.culqi.com/checkout-js"></script>
+
+   <script>
+      const publicKey = 'pk_test_71737f81d344c99c'; // Reemplaza con tu llave pública
+
+      const settings = {
+         title: 'Culqi Store 2',
+         currency: 'PEN',
+         amount: 8000, 
+         order: 'ord_test_Y-YQ0qmUqKA7BWhkV',
+      }
+
+      const paymentMethods = {
+         tarjeta: true,
+         yape: true,
+         billetera: false,
+         bancaMovil: false,
+         agente: false,
+         cuotealo: false,
+      }
+
+      const options = {
+         lang: 'auto',
+         installments: true,  // Habilitar o deshabilitar el campo de cuotas
+         modal: false, // Ahora se muestra embebido
+         container: "#culqi-container", // Contenedor donde se mostrará el checkout
+         paymentMethods: paymentMethods,
+         paymentMethodsSort: Object.keys(paymentMethods),  // las opciones se ordenan según se configuren en paymentMethods-
+      }
+
+      const client = {
+         email: 'test2@demo.com',
+      }
+
+      const appearance = {
+         theme: "default",
+         hiddenCulqiLogo: true,
+         hiddenBannerContent: false,
+         hiddenBanner: true,
+         hiddenToolBarAmount: false,
+         menuType: "sliderTop",  // default/sidebar / sliderTop / select
+         buttonCardPayText: "Pagar tal monto",
+         logo: 'https://res.cloudinary.com/dvtl2wcia/image/upload/v1726030102/Logo_Catshop_o727hq.ico',
+         defaultStyle: {
+            // bannerColor: "#e7770f",
+         },
+         // defaultStyle: {
+         //    bannerColor: "blue", // hexadecimal
+         //    buttonBackground: "yellow", // hexadecimal
+         //    menuColor: "pink", // hexadecimal
+         //    linksColor: "green", // hexadecimal
+         //    buttonTextColor: "blue", // hexadecimal
+         //    priceColor: "red",
+         // },
+         variables: {
+            fontFamily: "monospace",
+         },
+         rules: {
+            ".Culqi-Main-Container": {
+               background: "orange",
+            }
+         }
+      };
+
+      const handleCulqiAction = () => {
+         if (Culqi.token) {
+            const token = Culqi.token.id;
+            console.log('Se ha creado un Token: ', token);
+            // En esta línea de código debemos enviar el "Culqi.token.id"
+            // hacia tu servidor para procesar el pago con tarjeta
+
+            // Culqi.close(); // Para cerrar el panel de pago
+         } else if (Culqi.order) {
+            // Si se genera una orden (pago con PagoEfectivo, agente, etc.)
+            const order = Culqi.order;
+            console.log('Se ha creado la orden: ', order);
+            
+            // Enviar la orden al backend para confirmar la creación
+            fetch('/api/confirm-order', {
+               method: 'POST',
+               headers: {
+                  'Content-Type': 'application/json',
+               },
+               body: JSON.stringify(order),
+            })
+            .then(response => response.json())
+            .then(data => {
+               console.log('Orden confirmada en el backend:', data);
+               // Aquí puedes mostrar un mensaje al cliente con los detalles del pago
+            })
+            .catch(error => {
+               console.error('Error al confirmar la orden:', error);
+            });
+            
+            // Culqi.close(); // Para cerrar el panel de pago
+         } else {
+            
+            if (Culqi.error){
+               console.log('order')
+
+            }
+         }
+      };
+
+
+      // Si se genera una orden (pago con Yape, agente, etc.)
+      const config = {
+         settings,
+         client,
+         options,
+         appearance,
+      };
+
+      const Culqi = new CulqiCheckout(publicKey, config);
+
+      Culqi.culqi = handleCulqiAction;
+
+      // Abre el checkout embebido
+      Culqi.open();
+
+
+   </script>
+</body>
+
+</html>
